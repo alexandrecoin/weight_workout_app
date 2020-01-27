@@ -1,1 +1,1 @@
-# spotify_side_project
+# Workout and Weight tracking app
