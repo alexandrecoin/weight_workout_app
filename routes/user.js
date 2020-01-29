@@ -15,4 +15,29 @@ router.get('/users', async (req, res) => {
   }
 });
 
+router.post('/signup', async (req, res, next) => {
+  const isUserRegistered = await User.findOne({ email: req.body.email });
+  if (isUserRegistered) return next(new Error('User already exists'));
+  const newUser = new User({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    username: req.body.username,
+    password: req.body.password,
+    gender: req.body.gender,
+    email: req.body.email,
+    age: req.body.age,
+    weight: req.body.weight,
+  });
+  try {
+    newUser.save();
+    return res.status(201).send({ message: 'Account created' });
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+  // TODO
+  // Hash Password
+  // Password and email validation
+  // Other inputs validation
+});
+
 module.exports = router;
