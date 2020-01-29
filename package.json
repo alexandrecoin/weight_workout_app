@@ -5,11 +5,16 @@
   "repository": "git@github.com:alexandrecoin/weight_workout_app.git",
   "author": "Alexandre Coin <alexandre.pc.coin@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "nodemon": "^2.0.2"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.8.10"
   }
 }
