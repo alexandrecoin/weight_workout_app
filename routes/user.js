@@ -7,7 +7,6 @@ const bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
-
 router.get('/users', async (req, res) => {
   try {
     const users = await User.find();
@@ -33,9 +32,26 @@ router.post('/signup', async (req, res, next) => {
     res.status(400).send({ error: err.message });
   }
   // TODO
-  // Hash Password
   // Password and email validation
-  // Other inputs validation
+});
+
+router.post('/login', async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user)
+    return next(new Error('No account is associated with this email address'));
+  try {
+    bcrypt.compare(req.body.password, user.password, (_, result) => {
+      if (!result)
+        return res
+          .status(400)
+          .send({ err: 'Password or email is invalid. Please try again.' });
+// TODO
+// Ajouter token à la session de connexion du user    
+      res.status(200).send(`User ${user._id} connected`);
+    });
+  } catch (err) {
+    return res.status(400).send({ error: err.message });
+  }
 });
 
 module.exports = router;
