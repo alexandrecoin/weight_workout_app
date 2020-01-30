@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 const bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
+
 
 router.get('/users', async (req, res) => {
   try {
@@ -18,16 +20,12 @@ router.get('/users', async (req, res) => {
 router.post('/signup', async (req, res, next) => {
   const isUserRegistered = await User.findOne({ email: req.body.email });
   if (isUserRegistered) return next(new Error('User already exists'));
+  const salt = bcrypt.genSaltSync(12);
   const newUser = new User({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    username: req.body.username,
-    password: req.body.password,
-    gender: req.body.gender,
     email: req.body.email,
-    age: req.body.age,
-    weight: req.body.weight,
+    password: bcrypt.hashSync(req.body.password, salt),
   });
+  console.log(newUser);
   try {
     newUser.save();
     return res.status(201).send({ message: 'Account created' });

@@ -10,12 +10,12 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   username: {
-    required: true,
+    required: false,
     type: String,
     unique: true,
   },
   gender: {
-    required: true,
+    required: false,
     type: Boolean,
   },
   email: {
@@ -30,11 +30,11 @@ const userSchema = new mongoose.Schema({
     minlength: 8,
   },
   age: {
-    required: true,
+    required: false,
     type: Number,
   },
   weight: {
-    required: true,
+    required: false,
     type: Number,
   },
 });
