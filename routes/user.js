@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Token = require('../models/Token');
 const bcrypt = require('bcryptjs');
 
 const bodyParser = require('body-parser');
@@ -24,7 +25,6 @@ router.post('/signup', async (req, res, next) => {
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, salt),
   });
-  console.log(newUser);
   try {
     newUser.save();
     return res.status(201).send({ message: 'Account created' });
@@ -40,14 +40,21 @@ router.post('/login', async (req, res, next) => {
   if (!user)
     return next(new Error('No account is associated with this email address'));
   try {
-    bcrypt.compare(req.body.password, user.password, (_, result) => {
+    bcrypt.compare(req.body.password, user.password, async (_, result) => {
       if (!result)
         return res
           .status(400)
           .send({ err: 'Password or email is invalid. Please try again.' });
-// TODO
-// Ajouter token à la session de connexion du user    
-      res.status(200).send(`User ${user._id} connected`);
+      // TODO
+      // Ajouter token à la session de connexion du user
+      const newToken = new Token({
+        userId: user._id,
+      });
+      console.log(newToken);
+      const isTokenSaved = await newToken.save();
+      if (isTokenSaved) res.status(200).send(`User ${user._id} connected`);
+      // Changer "cannot send headers"
+      res.status(400).send({ message: 'Could not activate session' });
     });
   } catch (err) {
     return res.status(400).send({ error: err.message });
