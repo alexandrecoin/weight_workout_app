@@ -15,6 +15,9 @@ db.once('open', () => console.log('Connected to the database'));
 const usersRouter = require('./routes/user');
 app.use('/', usersRouter);
 
+const weightRouter = require('./routes/weight');
+app.use('/', weightRouter);
+
 app.listen(PORT, () => {
   console.log(`app listening on port: ${PORT}`);
 });
