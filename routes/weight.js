@@ -4,8 +4,9 @@ const Weight = require('../models/Weight');
 
 router.post('/weight/add', (req, res, next) => {
   const newWeight = new Weight({
-    userId: req.userId,
+    userId: req.body.userId,
     value: req.body.value,
+
   });
   try {
     newWeight.save();
