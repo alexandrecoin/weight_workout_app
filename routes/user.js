@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Weight = require('../models/Weight');
 const Token = require('../models/Token');
 const bcrypt = require('bcryptjs');
 
@@ -58,6 +59,19 @@ router.post('/login', async (req, res, next) => {
     });
   } catch (err) {
     return res.status(400).send({ error: err.message });
+  }
+});
+
+router.get('/users/:id/weights', async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user)
+    return next(new Error('Could not find user associated with that ID'));
+  try {
+    const weights = await Weight.find({ userId: user._id });
+    if (!weights) return next(new Error('No associated weight for this user'));
+    res.status(200).send(weights);
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
   }
 });
 

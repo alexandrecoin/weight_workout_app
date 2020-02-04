@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Weight = require('../models/Weight');
 
-router.post('/weight/add', (req, res, next) => {
+router.post('/weights/add', (req, res, next) => {
   const newWeight = new Weight({
     userId: req.body.userId,
     value: req.body.value,
