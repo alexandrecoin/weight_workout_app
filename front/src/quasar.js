@@ -2,7 +2,7 @@ import Vue from 'vue';
 
 import './styles/quasar.scss';
 import '@quasar/extras/material-icons/material-icons.css';
-import { Quasar, Notify } from 'quasar';
+import { Quasar, QTable, Notify } from 'quasar';
 
 Vue.use(Quasar, {
   config: {
@@ -11,7 +11,7 @@ Vue.use(Quasar, {
     },
   },
   components: {
-    /* not needed if importStrategy is not 'manual' */
+    QTable
   },
   directives: {
     /* not needed if importStrategy is not 'manual' */

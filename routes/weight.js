@@ -6,7 +6,6 @@ router.post('/weights/add', (req, res, next) => {
   const newWeight = new Weight({
     userId: req.body.userId,
     value: req.body.value,
-
   });
   try {
     newWeight.save();

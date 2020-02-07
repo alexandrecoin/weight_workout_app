@@ -1,8 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <ul v-for="(weight, index) in weights" v-bind:key="index">
-      <li>{{ weight.value }}</li>
-    </ul>
+    <q-table title="Weights" :data="weights" :columns="columns" row-key="_id" />
   </q-page>
 </template>
 
@@ -15,6 +13,10 @@ export default {
   data() {
     return {
       weights: [],
+      columns: [
+        { name: 'value', label: 'Value', field: 'value' },
+        { name: 'createdAt', label: 'Date', field: 'createdAt' },
+      ],
     };
   },
   methods: {
@@ -23,6 +25,10 @@ export default {
         'http://localhost:6789/users/5e33f8ff97e8a70ec123e31a/weights',
       );
       this.weights = response.data;
+      this.weights.map(
+        (weight) =>
+          (weight.createdAt = weight.createdAt.toString().slice(0, 10)),
+      );
     },
   },
   mounted() {
