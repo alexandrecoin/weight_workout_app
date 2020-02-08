@@ -5,4 +5,5 @@ Once completed and deployed, this app will allow you to track your workouts as w
 Features to be implemented (not in order) : 
   - Authentication
   - Workout planner
+  - Weight Loss time planner and calculator
   - Weight tracker
