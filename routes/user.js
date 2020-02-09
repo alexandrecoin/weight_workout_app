@@ -1,13 +1,18 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Weight = require('../models/Weight');
 const Token = require('../models/Token');
 const bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
 
 const bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
+
+const { SECRET_KEY } = process.env;
+const tokenExpiresIn = 86400;
 
 router.get('/users', async (req, res) => {
   try {
@@ -16,6 +21,31 @@ router.get('/users', async (req, res) => {
   } catch (err) {
     res.send(err);
   }
+});
+
+router.get('/me', (req, res) => {
+  var token = req.headers['x-access-token'];
+  if (!token)
+    return res.status(401).send({ auth: false, message: 'No token provided.' });
+
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err)
+      return res
+        .status(500)
+        .send({ auth: false, message: 'Failed to authenticate token.' });
+
+    User.findById(
+      decoded.id,
+      { password: 0 },
+      function(err, user) {
+        if (err)
+          return res.status(500).send('There was a problem finding the user.');
+        if (!user) return res.status(404).send('No user found.');
+
+        res.status(200).send(user);
+      },
+    );
+  });
 });
 
 router.post('/signup', async (req, res, next) => {
@@ -27,8 +57,15 @@ router.post('/signup', async (req, res, next) => {
     password: bcrypt.hashSync(req.body.password, salt),
   });
   try {
-    newUser.save();
-    return res.status(201).send({ message: 'Account created' });
+    const user = await newUser.save();
+    if (user) {
+      var token = jwt.sign({ id: user._id }, SECRET_KEY, {
+        tokenExpiresIn, 
+      });
+    }
+    return res
+      .status(201)
+      .send({ auth: true, token, message: 'Account created' });
   } catch (err) {
     res.status(400).send({ error: err.message });
   }
