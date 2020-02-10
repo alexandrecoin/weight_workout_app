@@ -34,17 +34,13 @@ router.get('/me', (req, res) => {
         .status(500)
         .send({ auth: false, message: 'Failed to authenticate token.' });
 
-    User.findById(
-      decoded.id,
-      { password: 0 },
-      function(err, user) {
-        if (err)
-          return res.status(500).send('There was a problem finding the user.');
-        if (!user) return res.status(404).send('No user found.');
+    User.findById(decoded.id, { password: 0 }, function(err, user) {
+      if (err)
+        return res.status(500).send('There was a problem finding the user.');
+      if (!user) return res.status(404).send('No user found.');
 
-        res.status(200).send(user);
-      },
-    );
+      res.status(200).send(user);
+    });
   });
 });
 
@@ -60,7 +56,7 @@ router.post('/signup', async (req, res, next) => {
     const user = await newUser.save();
     if (user) {
       var token = jwt.sign({ id: user._id }, SECRET_KEY, {
-        tokenExpiresIn, 
+        tokenExpiresIn,
       });
     }
     return res
@@ -78,25 +74,22 @@ router.post('/login', async (req, res, next) => {
   if (!user)
     return next(new Error('No account is associated with this email address'));
   try {
-    bcrypt.compare(req.body.password, user.password, async (_, result) => {
-      if (!result)
-        return res
-          .status(400)
-          .send({ err: 'Password or email is invalid. Please try again.' });
-      // TODO
-      // Ajouter token à la session de connexion du user
-      const newToken = new Token({
-        userId: user._id,
-      });
-      console.log(newToken);
-      const isTokenSaved = await newToken.save();
-      if (isTokenSaved) res.status(200).send(`User ${user._id} connected`);
-      // Changer "cannot send headers"
-      res.status(400).send({ message: 'Could not activate session' });
+    const isPasswordValid = bcrypt.compareSync(
+      req.body.password,
+      user.password,
+    );
+    if (!isPasswordValid) res.status(401).send({ auth: false, token: null });
+    var token = jwt.sign({ id: user._id }, SECRET_KEY, {
+      expiresIn: tokenExpiresIn,
     });
+    res.status(200).send({ auth: true, token: token });
   } catch (err) {
     return res.status(400).send({ error: err.message });
   }
+});
+
+router.get('/logout', (req, res) => {
+  res.status(200).send({ auth: false, token: null });
 });
 
 router.get('/users/:id/weights', async (req, res, next) => {
