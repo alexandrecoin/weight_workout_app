@@ -13,6 +13,7 @@ router.use(bodyParser.json());
 
 const { SECRET_KEY } = process.env;
 const tokenExpiresIn = 86400;
+const verifyToken = require('../helpers/verifyToken');
 
 router.get('/users', async (req, res) => {
   try {
@@ -23,24 +24,13 @@ router.get('/users', async (req, res) => {
   }
 });
 
-router.get('/me', (req, res) => {
-  var token = req.headers['x-access-token'];
-  if (!token)
-    return res.status(401).send({ auth: false, message: 'No token provided.' });
-
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+router.get('/me', verifyToken, (req, res) => {
+  User.findById(req.userId, { password: 0 }, (err, user) => {
     if (err)
-      return res
-        .status(500)
-        .send({ auth: false, message: 'Failed to authenticate token.' });
+      return res.status(500).send('There was a problem finding the user.');
+    if (!user) return res.status(404).send('No user found.');
 
-    User.findById(decoded.id, { password: 0 }, function(err, user) {
-      if (err)
-        return res.status(500).send('There was a problem finding the user.');
-      if (!user) return res.status(404).send('No user found.');
-
-      res.status(200).send(user);
-    });
+    res.status(200).send(user);
   });
 });
 
@@ -56,7 +46,7 @@ router.post('/signup', async (req, res, next) => {
     const user = await newUser.save();
     if (user) {
       var token = jwt.sign({ id: user._id }, SECRET_KEY, {
-        tokenExpiresIn,
+        expiresIn: tokenExpiresIn,
       });
     }
     return res
