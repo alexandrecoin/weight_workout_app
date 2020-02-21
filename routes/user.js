@@ -24,16 +24,6 @@ router.get('/users', async (req, res) => {
   }
 });
 
-router.get('/me', verifyToken, (req, res) => {
-  User.findById(req.userId, { password: 0 }, (err, user) => {
-    if (err)
-      return res.status(500).send('There was a problem finding the user.');
-    if (!user) return res.status(404).send('No user found.');
-
-    res.status(200).send(user);
-  });
-});
-
 router.post('/signup', async (req, res, next) => {
   const isUserRegistered = await User.findOne({ email: req.body.email });
   if (isUserRegistered) return next(new Error('User already exists'));
