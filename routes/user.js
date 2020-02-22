@@ -31,7 +31,14 @@ router.post('/signup', async (req, res, next) => {
   const newUser = new User({
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, salt),
+    confirmPassword: req.body.confirmPassword,
   });
+  if (!newUser.confirmPassword) {
+    return res.status(400).send({ error: 'Password must be confirmed' });
+  }
+  if (req.body.password !== newUser.confirmPassword) {
+    return res.status(400).send({ error: 'Passwords must match' });
+  }
   try {
     const user = await newUser.save();
     if (user) {
@@ -46,7 +53,7 @@ router.post('/signup', async (req, res, next) => {
     res.status(400).send({ error: err.message });
   }
   // TODO
-  // Password and email validation
+  // email validation
 });
 
 router.post('/login', async (req, res, next) => {

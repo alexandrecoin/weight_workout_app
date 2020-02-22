@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 8,
   },
+  confirmPassword: {
+    required: true,
+    type: String,
+    minlength: 8,
+  },
   age: {
     required: false,
     type: Number,
