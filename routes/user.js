@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Weight = require('../models/Weight');
 const Token = require('../models/Token');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 var jwt = require('jsonwebtoken');
 
 const bodyParser = require('body-parser');
@@ -25,19 +26,23 @@ router.get('/users', async (req, res) => {
 });
 
 router.post('/signup', async (req, res, next) => {
+  const newUser = {};
   const isUserRegistered = await User.findOne({ email: req.body.email });
   if (isUserRegistered) return next(new Error('User already exists'));
   const salt = bcrypt.genSaltSync(12);
-  const newUser = new User({
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, salt),
-    confirmPassword: req.body.confirmPassword,
-  });
-  if (!newUser.confirmPassword) {
-    return res.status(400).send({ error: 'Password must be confirmed' });
-  }
-  if (req.body.password !== newUser.confirmPassword) {
-    return res.status(400).send({ error: 'Passwords must match' });
+  if (validator.isEmail(req.body.email)) {
+    newUser = new User({
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, salt),
+      confirmPassword: req.body.confirmPassword,
+    });
+
+    if (!newUser.confirmPassword) {
+      return res.status(400).send({ error: 'Password must be confirmed' });
+    }
+    if (req.body.password !== newUser.confirmPassword) {
+      return res.status(400).send({ error: 'Passwords must match' });
+    }
   }
   try {
     const user = await newUser.save();
@@ -52,8 +57,6 @@ router.post('/signup', async (req, res, next) => {
   } catch (err) {
     res.status(400).send({ error: err.message });
   }
-  // TODO
-  // email validation
 });
 
 router.post('/login', async (req, res, next) => {
